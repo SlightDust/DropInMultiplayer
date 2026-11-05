@@ -40,7 +40,7 @@ namespace DropInMultiplayer
     {
         public const string PluginGUID = "com.niwith.DropInMultiplayer";
         public const string PluginName = "Drop In Multiplayer";
-        public const string PluginVersion = "4.2.1";
+        public const string PluginVersion = "4.3.0";
 
         private const string HelpHelpText = "Usage: help {command}\nDescription: Prints help text for command";
         private const string JoinAsHelpText = "Usage: join_as {survivor} {player (optional)}\nDescription: Join in-progress run as the given survivor";
@@ -78,6 +78,10 @@ namespace DropInMultiplayer
             DropInConfig = new DropInMultiplayerConfig(Config);
 
             SetupEventHandlers();
+
+            // Load every installed language so join_as accepts names in any language,
+            // independently of the host's own language setting.
+            Instance.StartCoroutine(SurvivorNameResolver.PreloadLanguageStrings());
         }
 
         private static void SetupEventHandlers()
@@ -412,7 +416,7 @@ namespace DropInMultiplayer
             }
             else if (DropInConfig.AllowJoinAsAllBodies.Value)
             {
-                BodyIndex bodyIndex = BodyCatalog.FindBodyIndexCaseInsensitive(survivorOrBodyName.EndsWith("Body", StringComparison.InvariantCultureIgnoreCase) ? survivorOrBodyName : survivorOrBodyName + "Body");
+                BodyIndex bodyIndex = FindBodyIndexByName(survivorOrBodyName);
                 if (bodyIndex == BodyIndex.None)
                 {
                     return "Unable to find survivor or body with given name";
@@ -423,7 +427,7 @@ namespace DropInMultiplayer
             }
             else
             {
-                return "Unable to find survivor with the given name";
+                return $"Unable to find survivor with the name {survivorOrBodyName}. Try /list_survivors to see the available names";
             }
 
             JoinAsResult joinAsResult;
@@ -669,16 +673,60 @@ namespace DropInMultiplayer
             {
                 return availibleSurvivors[_rand.Next(availibleSurvivors.Length)];
             }
-            else
-            {
-                return availibleSurvivors.Where(NameStringMatches).FirstOrDefault();
-            }
+
+            string normalizedName = SurvivorNameResolver.Normalize(name);
+            return availibleSurvivors.Where(NameStringMatches).FirstOrDefault();
 
             bool NameStringMatches(SurvivorDef survivorDef)
             {
-                return string.Equals(survivorDef.cachedName, name, StringComparison.InvariantCultureIgnoreCase)
-                    || string.Equals(Language.GetString(survivorDef.displayNameToken).Replace(" ", ""), name.Replace(" ", ""), StringComparison.InvariantCultureIgnoreCase);
+                return SurvivorNameResolver.Matches(survivorDef, normalizedName);
             }
+        }
+
+        /// <summary>
+        /// Finds a body index by comparing normalized names, so "Enforcer" also matches
+        /// "Enforcer2Body" and "Engineer" matches "EngiBody". Used as a fallback when
+        /// AllowJoinAsAllBodies is enabled.
+        /// </summary>
+        private static BodyIndex FindBodyIndexByName(string name)
+        {
+            BodyIndex bodyIndex = BodyCatalog.FindBodyIndexCaseInsensitive(name.EndsWith("Body", StringComparison.InvariantCultureIgnoreCase) ? name : name + "Body");
+            if (bodyIndex != BodyIndex.None)
+            {
+                return bodyIndex;
+            }
+
+            string normalizedName = SurvivorNameResolver.Normalize(name);
+            if (normalizedName.EndsWith("body", StringComparison.Ordinal))
+            {
+                normalizedName = normalizedName.Substring(0, normalizedName.Length - "body".Length);
+            }
+
+            if (normalizedName.Length == 0)
+            {
+                return BodyIndex.None;
+            }
+
+            foreach (GameObject bodyPrefab in BodyCatalog.allBodyPrefabs)
+            {
+                if (!bodyPrefab)
+                {
+                    continue;
+                }
+
+                string prefabName = SurvivorNameResolver.Normalize(bodyPrefab.name);
+                if (prefabName.EndsWith("body", StringComparison.Ordinal))
+                {
+                    prefabName = prefabName.Substring(0, prefabName.Length - "body".Length);
+                }
+
+                if (string.Equals(prefabName, normalizedName, StringComparison.Ordinal))
+                {
+                    return BodyCatalog.FindBodyIndex(bodyPrefab);
+                }
+            }
+
+            return BodyIndex.None;
         }
 
         private static void GiveCatchUpItems(NetworkUser player)

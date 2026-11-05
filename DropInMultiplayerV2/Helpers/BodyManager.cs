@@ -65,7 +65,7 @@ namespace DropInMultiplayer.Helpers
             
             bool NameStringMatches(SurvivorDef survivorDef)
             {
-                return string.Equals(survivorDef.cachedName, name);
+                return SurvivorNameResolver.Matches(survivorDef, SurvivorNameResolver.Normalize(name));
             }
         }
     }
