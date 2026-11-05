@@ -28,7 +28,7 @@ These commands should be sent into the game chat, can also be used in console wi
 * **/join_as Commando** - Spawns you in as commando.
 * **/join_as Huntress niwith** - Spawns niwith in as Huntress, replace niwith with whoever you'd like to spawn as huntress/whatever in the names list. 
 * **/list_survivors** - Lists availible survivors for the join_as command
-* **/list_bodies** - Lists availible bodies for join_as command (bodies will only work for join_as if "AllowJoinAsAnyBody" is enabled in config settings)
+* **/list_bodies** - Lists availible bodies for join_as command (bodies will only work for join_as if "AllowJoinAsAllBodies" is enabled in config settings)
 
 If you get stuck, try the help command: 
 * **/help** - Lists availible commands
