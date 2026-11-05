@@ -1,11 +1,12 @@
 # DropInMultiplayer
-The drop in multiplayer mod for Risk of Rain 2, now updated (hopefully) to work with Alloyed Collective!
+The drop in multiplayer mod for Risk of Rain 2, now updated (hopefully) to work with DLC4 - Hallowed Concepts (万象归衡)!
 This mod allows the host to have players join mid-game, and automatically gives them items to help them catch up!
 
-If you have any bug reports, ping me on the modding discord (@niwith on https://discord.gg/5MbXZvd), or feel free to private message me.
-**If you are reporting a bug, please include a copy of your logs, type "!log" in the modding dicsord server for instructions on how to grab your logs.**
+If you have any bug reports, please open an issue at https://github.com/SlightDust/DropInMultiplayer/issues.
+**If you are reporting a bug, please attach your `BepInEx/LogOutput.log` file to the issue.**
 
 Credit to https://thunderstore.io/package/SushiDev/DropinMultiplayer/ for originally creating this mod.
+This fork is maintained at https://github.com/SlightDust/DropInMultiplayer.
 
 ## Instructions
 ### How to Join Existing Game (Steam)
@@ -49,6 +50,11 @@ Also if updating from an old version of the mod, your old config may hang around
 * [WIP] Switching from Operator doesn't remove the drones that come as part of the character, working on a fix for this one just needs more work
 
 # Changelog
+### 4.3.0
+* Added support for DLC4 - Hallowed Concepts (万象归衡) survivors
+* Survivor name matching now accepts internal names, body prefab names, English names and the display names of every installed language (e.g. Engineer / Engi / 工程师 / エンジニア)
+* All installed language strings are preloaded at startup, so the host's language no longer limits which language players can type
+
 ### 4.2.1
 * Long time no update, fixed a couple bugs with a few merged pull requests
     * Thank you to @timlag1305 (https://github.com/timlag1305) for pull request "Fix null respawn, cleanup project build" (https://github.com/niwith/DropInMultiplayer/pull/26)
