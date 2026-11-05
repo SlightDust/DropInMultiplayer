@@ -1,9 +1,9 @@
 {
     "name": "DropinMultiplayer",
-    "author": "niwith",
-    "version_number": "4.2.1",
+    "author": "SlightDust",
+    "version_number": "4.3.0",
     "website_url": "https://github.com/niwith/DropInMultiplayer",
-    "description": "Drop in and out of multiplayer with your friends. Automatically adds items to help you catch up.",
+    "description": "支持中途加入多人游戏并自动补齐追赶物品；支持多语言幸存者名，支持 DLC4（万象归衡）。 | Drop in and out of multiplayer with your friends, automatically receive catch-up items, and use survivor names in any language. Supports DLC4 (Hallowed Concepts).",
     "dependencies": [
         "bbepis-BepInExPack-5.4.2121",
         "RiskofThunder-R2API_Core-5.3.0"
