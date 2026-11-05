@@ -25,6 +25,8 @@ namespace DropInMultiplayer.Helpers
         private static readonly Regex RichTextTagRegex = new Regex("<[^>]+>", RegexOptions.Compiled);
         private static readonly Dictionary<SurvivorDef, string[]> NameCache = new Dictionary<SurvivorDef, string[]>();
 
+        internal static bool PreloadComplete { get; private set; }
+
         // Keyed by normalized internal name. Only needed for names that are not present in
         // any of the game's language files or that players commonly spell differently.
         private static readonly Dictionary<string, string[]> ExtraAliases = new Dictionary<string, string[]>
@@ -48,7 +50,16 @@ namespace DropInMultiplayer.Helpers
             string stripped = RichTextTagRegex.Replace(value, string.Empty);
 
             // Convert full-width characters to their half-width equivalents.
-            string normalized = stripped.Normalize(NormalizationForm.FormKC);
+            string normalized;
+            try
+            {
+                normalized = stripped.Normalize(NormalizationForm.FormKC);
+            }
+            catch (ArgumentException)
+            {
+                // Malformed UTF-16 input, fall back to the unnormalized string.
+                normalized = stripped;
+            }
 
             StringBuilder builder = new StringBuilder(normalized.Length);
             foreach (char character in normalized)
@@ -104,6 +115,8 @@ namespace DropInMultiplayer.Helpers
 
                 yield return null;
             }
+
+            PreloadComplete = true;
         }
 
         private static string[] GetNames(SurvivorDef survivorDef)
@@ -151,10 +164,9 @@ namespace DropInMultiplayer.Helpers
 
             string[] result = names.ToArray();
 
-            // Do not cache before all language files have been loaded, otherwise the
-            // localized names would be missing for the rest of the session.
-            bool allLanguagesLoaded = Language.GetAllLanguages().All(language => language == null || language.stringsLoaded);
-            if (allLanguagesLoaded)
+            // Only cache once every language has been loaded, otherwise localized names
+            // would be missing for the rest of the session.
+            if (PreloadComplete)
             {
                 NameCache[survivorDef] = result;
             }
